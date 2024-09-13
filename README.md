@@ -10,8 +10,21 @@
 - `docker compose up -d --build`
 - goto [localhost:3000](http://localhost:3000)
 
-Ruby console can be accessed from `docker-compose run --rm web $CMD`
+## Usefull Commands
+The docker container can be directly invoked with:
+`docker-compose run --rm web $CMD`
+
+Or you can enter bash into the container with:
+- `dp exec -it web bash`
+
 - `docker run --rm -v $(pwd):/usr/src/app -w /usr/src/app ruby bundle lock --update`
+
+# Services
+- Postgres
+
+# Deployment
+gh actions
+
 
 This README would normally document whatever steps are necessary to get the
 application up and running.

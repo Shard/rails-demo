@@ -1,0 +1,47 @@
+<h1>Stock Trading</h1>
+
+<div id="current-price">
+  <h2>Current Price: $<%= number_with_precision(@current_price, precision: 2) %></h2>
+</div>
+
+<div id="historical-prices">
+  <h3>Last 30 Minutes</h3>
+  <canvas id="price-chart"></canvas>
+</div>
+
+<div id="trading-actions">
+  <%= button_to 'Buy', buy_quotes_path, method: :post %>
+  <%= button_to 'Sell', sell_quotes_path, method: :post %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function renderPage() {
+    const ctx = document.getElementById('price-chart').getContext('2d');
+    const data = <%= raw @historical_prices.to_json %>;
+    
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: data.map(d => new Date(d[1]).toLocaleTimeString()),
+        datasets: [{
+          label: 'Stock Price',
+          data: data.map(d => d[0]),
+          borderColor: 'rgb(75, 192, 192)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded', renderPage);
+  // @HACK: Probably a better event to listen to here
+  document.addEventListener('turbo:load', renderPage);
+</script>
