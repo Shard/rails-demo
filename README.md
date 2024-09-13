@@ -2,6 +2,7 @@
 
 ## Requirements
 - Docker (with Compose CLI, Buildx optional)
+- Terraform (To deploy to AWS)
 
 ## Quickstart
 
