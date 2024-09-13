@@ -1,0 +1,31 @@
+services:
+  web:
+    build:
+      context: .
+      target: rails-app
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/myapp
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://${PG_USER}:${PG_PASS}@db:5432/${PG_DB}
+      RAILS_ENV: "development"
+
+  db:
+    image: postgres:16.4-bookworm
+    volumes:
+      - postgres_data:/data/postgres
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
+      PGDATA: /data/postgres
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+volumes:
+  postgres_data:
