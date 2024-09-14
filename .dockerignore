@@ -46,3 +46,6 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Ignore Terraform
+/terraform
