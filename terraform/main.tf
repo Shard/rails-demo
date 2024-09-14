@@ -1,4 +1,11 @@
 terraform {
+  cloud {
+    organization = "shard-org"
+    workspaces {
+      name = "rails-app"
+    }
+  }
+
   required_providers {
     docker = {
       source = "calxus/docker"
@@ -167,10 +174,12 @@ resource "aws_iam_role" "ecsTaskExecutionRole" {
     policy = data.aws_iam_policy_document.task_execution_policy.json
   }
 }
+
+# Docker reference
+# Used to pull a reference to the latest image for the task definition
 data "docker_registry_image" "rails_app" {
   name = "ghcr.io/shard/rails-demo:master"
 }
-
 resource "docker_image" "rails_app" {
   name = data.docker_registry_image.rails_app.name
 }
