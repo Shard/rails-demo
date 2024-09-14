@@ -1,18 +1,30 @@
+# Base Ruby on Rails configuration
+x-rails: &rails
+  build:
+    context: .
+    target: rails-app
+  volumes:
+    - .:/rails
+  depends_on:
+    - db
+  environment:
+    DATABASE_URL: postgres://${PG_USER}:${PG_PASS}@db:5432/${PG_DB}
+    RAILS_ENV: "development"
+
 services:
+  # Frontend web service
   web:
-    build:
-      context: .
-      target: rails-app
+    <<: *rails
     command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
       - .:/rails
     ports:
       - "3000:3000"
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: postgres://${PG_USER}:${PG_PASS}@localhost:5432/${PG_DB}
-      RAILS_ENV: "development"
+
+  #
+  task-quotes:
+    <<: *rails
+    command: bundle exec rake jobs:run_price_generator
 
   db:
     image: postgres:16.4-bookworm
