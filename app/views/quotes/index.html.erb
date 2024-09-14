@@ -41,8 +41,10 @@
     }
   }
   
-  function renderChart(newData) {
-    
+  function renderChart() {
+    if(chart) {
+      return;
+    }
     chart = new Chart(ctx, {
       type: 'line',
       data: {
