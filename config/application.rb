@@ -19,7 +19,7 @@ module Valiant
     # Asynchronously execute Active Job jobs
     config.active_job.queue_adapter = :resque
 
-    #config.action_cable.mount_path = '/cable'
+    # config.action_cable.mount_path = '/cable'
 
     # Configuration for the application, engines, and railties goes here.
     #
