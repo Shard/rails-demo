@@ -6,7 +6,7 @@ on:
     branches: [ master ]
 
 env:
-  DATABASE_URL: postgres://user:pass@db:5432/app_test
+  DATABASE_URL: postgres://user:pass@localhost:5432/app_test
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      db:
+      postgres:
         image: postgres:16.4-bookworm
         ports:
           - 5432:5432

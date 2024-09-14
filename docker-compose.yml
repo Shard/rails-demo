@@ -11,7 +11,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://${PG_USER}:${PG_PASS}@db:5432/${PG_DB}
+      DATABASE_URL: postgres://${PG_USER}:${PG_PASS}@localhost:5432/${PG_DB}
       RAILS_ENV: "development"
 
   db:
