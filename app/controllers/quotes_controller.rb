@@ -6,11 +6,11 @@ class QuotesController < ApplicationController
 
   def buy
     # Implement buy logic here
-    redirect_to quotes_path, notice: 'Stock purchased successfully'
+    redirect_to quotes_path, notice: "Stock purchased successfully"
   end
 
   def sell
     # Implement sell logic here
-    redirect_to quotes_path, notice: 'Stock sold successfully'
+    redirect_to quotes_path, notice: "Stock sold successfully"
   end
 end
