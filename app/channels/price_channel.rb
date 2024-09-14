@@ -1,6 +1,6 @@
-class QuotesChannel < ApplicationCable::Channel
+class PriceChannel < ApplicationCable::Channel
   def subscribed
-    stream_from "quotes_channel"
+    stream_from "PriceChannel"
   end
 
   def unsubscribed

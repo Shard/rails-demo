@@ -4,7 +4,7 @@ namespace :jobs do
   desc "Run the stock price generator job every second"
   task run_price_generator: :environment do
     loop do
-      GenerateQuotesJob.perform_later
+      GenerateQuotesJob.perform_now
       sleep 1
     end
   end
