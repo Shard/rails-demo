@@ -3,4 +3,16 @@
 
 import { createConsumer } from "@rails/actioncable"
 
+function getConsumerEndpoint() {
+  if (window.location.protocol === 'http:') {
+    // Fix for http only deployment
+    return 'ws://' + window.location.host + '/cable'
+  } else {
+    // Use default endpoint
+    return undefined;
+  }
+}
+
+
+
 export default createConsumer()
