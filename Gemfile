@@ -22,6 +22,10 @@ gem "pg", "~> 1.5", ">= 1.5.4"
 gem "redis", "~> 5.2"
 gem "resque"
 
+gem "stackprof"
+gem "sentry-ruby"
+gem "sentry-rails"
+
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 

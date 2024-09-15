@@ -212,6 +212,9 @@ resource "aws_ecs_task_definition" "rails_task" {
     },{
       name  = "SECRET_KEY_BASE"
       value = "not-used :)"
+    }, {
+      name  = "SENTRY_DSN"
+      value = "https://7f62063764598ee3af9e32bbdbb96f9f@o52427.ingest.us.sentry.io/4507954611421184"
     }]
     logConfiguration = {
       logDriver = "awslogs"
