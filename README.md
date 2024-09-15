@@ -38,11 +38,14 @@ When a new commit is push to `master` and all required CI steps pass, a containe
 
 Terraform manages all of the AWS infrastructure required to deploy the application and all of its services. When running `terraform apply` the latest `master` tagged image built via CI will be used for deployment.
 
+## Dependencies
+Valid AWS credentials must be present in `~/.aws/credentials` in order to use terraform to deploy to an account.
+
+Terraform state is currently stored using HCP to allow GH actions access. Removing the reference in `main.tf` will allow for using terraform on a different AWS account.
+
 # TODO
-- [ ] Sentry Monitoring of backend and frontend
 - [ ] Terraform deployments in GH actions
 - [ ] Cloudwatch metric alerts for RDS/ElasticCache
-- [ ] GH action series/para
 - [ ] Buy/Sell/Money
 - [ ] Apply a more sophisticated algorithm to quote generation
 

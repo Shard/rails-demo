@@ -1,4 +1,10 @@
+#####################
+# Meta Configuration and packages
+#####################
 terraform {
+  # Use Terraform Cloud to store the state
+  # @NOTE: can be removed to if you want to store the state locally or setup
+  # on a different AWS Account
   cloud {
     organization = "shard-org"
     workspaces {
