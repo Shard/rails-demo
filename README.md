@@ -1,17 +1,22 @@
-# Valiant App
+# Ralis Stock Demo
+Ruby on Rails application demonstrating the use of Docker, Terraform, Github actions and AWS to impliment a lightweight and secure CI/CD pipeline. Also contains stocks and the sun 🌞.
+
+# Local Development
 
 ## Requirements
-- Docker (with Compose CLI, Buildx optional)
-- Terraform (To deploy to AWS)
+- Docker with Compose CLI (buildx optional but recomended)
+- Terraform (For deployments to aws)
 
 ## Quickstart
 
-- `cp .env.example .env`
 - `git clone git@github.com:Shard/rails-demo.git`
+- `cp .env.example .env`
 - `docker compose up -d --build`
-- goto [localhost:3000](http://localhost:3000)
+- Open [localhost:3000](http://localhost:3000)
 
 ## CLI within Docker
+The project is setup to allow for all development to occur inside the container.
+
 One off commands via the CLI within the rails docker container can be directly invoked with:
 ```bash
 docker-compose run --rm web $CMD
@@ -27,26 +32,38 @@ Update gem lockfile:
 docker run --rm -v $(pwd):/usr/src/app -w /usr/src/app ruby bundle lock --update
 ```
 
-## Services
-- Postgres (Database)
-- Redis (Queues)
+## Internal Services
+- Postgres - Single source of truth
+- Redis - Provides backing for Resque Queues and ActionCable
 
-# Deployment
-Deployments are handled by Github Actions and Terraform.
+# AWS Deployment
+Deployments are handled by Github Actions and Terraform. The target is AWS Cloud.
 
-When a new commit is push to `master` and all required CI steps pass, a container artifact will be published to the github container registery.
+When a new commit is pushed to `master` and all required CI steps pass, a container artifact will be published to the github container registery and a terraform plan will be generated. 
 
-Terraform manages all of the AWS infrastructure required to deploy the application and all of its services. When running `terraform apply` the latest `master` tagged image built via CI will be used for deployment.
+During this time the plan step can be inspected to see all the changes that will be made and the container will be available under [packages](https://github.com/Shard/rails-demo/pkgs/container/rails-demo). Once the [deployment](https://github.com/Shard/rails-demo/deployments) has been approved the plan will be applied to AWS.
 
-## Dependencies
-Valid AWS credentials must be present in `~/.aws/credentials` in order to use terraform to deploy to an account.
+Terraform manages all of the AWS infrastructure required to deploy the application and all of its supporting internal services. When running `terraform apply` the latest `master` tagged image built via CI will be used for deployment.
 
-Terraform state is currently stored using HCP to allow GH actions access. Removing the reference in `main.tf` will allow for using terraform on a different AWS account.
+## Deployment Dependencies
+Valid AWS credentials must be available to the [aws](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#provider-configuration) provider along with `terraform` being installed.
 
-# TODO
-- [ ] Buy/Sell/Money
+## AWS Services
+- Application Load Balancer
+- Elastic Container Service/Fargate (Docker Compose in the cloud)
+- RDS Aurora Serverless (Postgres)
+- ElastiCache (Redis)
+- Cloudwatch (Container and infrastructure metrics, Alerting)
 
-# Notes
+# External Services
+
+## Sentry
+Sentry is used to collect and present Errors and Traces from both the frontend and backend.
+
+## Hashicorp Cloud (HCP)
+Terraform state is currently stored using HCP to allow Github actions access to the state. Removing the `terraform.cloud` block in `main.tf` to will allow for using terraform on a different AWS account.
+
+# Notes on future improvements
 
 ## Zero Downtime maintaince
 Using AWS Aurora [ZDP](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_UpgradeDBInstance.PostgreSQL.MinorUpgrade.html#USER_UpgradeDBInstance.PostgreSQL.Minor.zdp) feature allows for connections to be preserved when rolling out upgrades.
@@ -64,4 +81,4 @@ Going further can also be the approach of logging query plans in production/stag
 
 Another approach would be looking at the kinds of workloads that are being processed and investigating whether the postgres JIT should be enabled or disabled as it can have quite signifigant performance penalities if misconfigured.
 
-Beyond that further approachs can involve adopting tools like grafana or datadog which are able to blend timeseries metrics with data such as logs, performance profile, predefined events based on prior investigation to help track down performance problems that might not be down to 1 system alone playing up.
+Beyond that further approachs can involve adopting prometheus tools like grafana or datadog which are able to blend timeseries metrics with other ts-like data such as logs, performance profile, predefined events based on prior investigation to help track down performance problems that might not be down to 1 system alone playing up.
