@@ -24,8 +24,8 @@ provider "docker" {}
 
 # AWS configuration
 provider "aws" {
-  shared_credentials_files = ["$HOME/.aws/credentials"]
-  profile                 = "default"
+  #shared_credentials_files = ["$HOME/.aws/credentials"]
+  #profile                 = "default"
   region                  = "${var.aws_region}"
 }
 data "aws_caller_identity" "current" {}
