@@ -105,6 +105,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    # Only run this job when all previous jobs are successful
+    needs: [ scan_ruby, scan_js, lint, test ]
+    if: always() && !cancelled() && !contains(needs.*.result, 'failure')
+
     # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
       contents: read
