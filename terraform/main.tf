@@ -84,6 +84,7 @@ resource "aws_rds_cluster_instance" "database" {
   engine             = aws_rds_cluster.postgresql.engine
   engine_version     = aws_rds_cluster.postgresql.engine_version
   db_subnet_group_name = module.vpc.database_subnet_group_name
+  #performance_insights_enabled = true
 }
 
 #################
@@ -138,6 +139,10 @@ resource "aws_security_group" "rails_app_sg" {
 }
 resource "aws_ecs_cluster" "rails_cluster" {
   name = "rails-app-cluster"
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
 resource "aws_ecs_cluster_capacity_providers" "ecs-cluster-capacity" {
   cluster_name       = aws_ecs_cluster.rails_cluster.name
@@ -439,4 +444,12 @@ output "app-container-hash" {
 
 output "rds-endpoint" {
   value = aws_rds_cluster.postgresql.endpoint
+}
+
+output "public-domain" {
+  value = aws_acm_certificate.rails_app.domain_name
+}
+
+output "alb-dns" {
+  value = aws_lb.main.dns_name
 }
