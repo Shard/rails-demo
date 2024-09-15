@@ -44,11 +44,11 @@
       chart.data.datasets[0].data = price_data.map(d => d[0]);
       chart.update();
     } else {
-      renderChart();
+      initChart();
     }
   }
   
-  function renderChart() {
+  function initChart() {
     if(chart) {
       return;
     }
@@ -73,6 +73,8 @@
         }
       }
     });
+    updateBalance(x => x);
+    updateOwned(x => x);
   }
 
   // Updates balance/owned using a functor
@@ -117,6 +119,6 @@
   });
   
   // Bindings
-  document.addEventListener('DOMContentLoaded', renderChart);
-  document.addEventListener('turbo:load', renderChart);
+  document.addEventListener('DOMContentLoaded', initChart);
+  document.addEventListener('turbo:load', initChart);
 </script>

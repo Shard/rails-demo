@@ -14,9 +14,9 @@ class GenerateQuotesJob < ApplicationJob
     new_price = [ new_price, 1.0 ].max
 
     # Random spikes
-    if rand(100) < 2  # 2% chance of a spike
+    if rand(100) < 4  # 4% chance of a spike
       spike_direction = rand(2) == 0 ? 1 : -1  # Randomly choose up or down
-      spike_magnitude = rand(5.0..30.0)  # Random spike between 5% and 30%
+      spike_magnitude = rand(5.0..40.0)  # Random spike between 5% and 40%
       new_price = (previous_price * (1 + spike_direction * spike_magnitude / 100)).round(2)
     end
 
