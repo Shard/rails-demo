@@ -44,7 +44,6 @@ Valid AWS credentials must be present in `~/.aws/credentials` in order to use te
 Terraform state is currently stored using HCP to allow GH actions access. Removing the reference in `main.tf` will allow for using terraform on a different AWS account.
 
 # TODO
-- [ ] Terraform deployments in GH actions
 - [ ] Cloudwatch metric alerts for RDS/ElasticCache
 - [ ] Buy/Sell/Money
 - [ ] Apply a more sophisticated algorithm to quote generation
