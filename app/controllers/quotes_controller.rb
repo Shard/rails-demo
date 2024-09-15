@@ -1,7 +1,7 @@
 class QuotesController < ApplicationController
   def index
     @current_price = Quote.order(created: :desc).first&.price || 0
-    @historical_prices = Quote.order(created: :desc).limit(30).pluck(:price, :created)
+    @historical_prices = Quote.order(created: :desc).limit(60).pluck(:price, :created)
   end
 
   def buy

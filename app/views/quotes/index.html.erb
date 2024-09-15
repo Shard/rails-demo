@@ -1,4 +1,4 @@
-<h1>Stock Trading</h1>
+<h1>MemeStock Simulation</h1>
 
 <div>
   <h2>Current Price: <span id="current-price">$<%= number_with_precision(@current_price, precision: 2) %></span></h2>
@@ -9,7 +9,7 @@
 </div>
 
 <div id="historical-prices">
-  <h3>Last 30 Seconds</h3>
+  <h3>Last 60 Seconds</h3>
   <canvas id="price-chart"></canvas>
 </div>
 
@@ -50,7 +50,7 @@
       data: {
         labels: price_data.map(d => new Date(d[1]).toLocaleTimeString()),
         datasets: [{
-          label: 'Stock Price',
+          label: 'ValveCoin Price',
           data: price_data.map(d => d[0]),
           borderColor: 'rgb(75, 192, 192)',
           tension: 0.1
