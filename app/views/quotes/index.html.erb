@@ -17,7 +17,7 @@
   <div class="trading-actions grid">
     <span onclick="buyStock()" role="button">Buy</span>
     <span onclick="sellStock()" role="button">Sell</span>
-    <span onclick="updateBalance(x => x + 1)" role="button" class="secondary">Praise the sun</span>
+    <span onclick="updateBalance(x => x + 1 * (owned * 0.1))" role="button" class="secondary">Praise the sun</span>
   </div>
   <label id="owned">Stocks Owned: <input type="text" readonly value="0" style="display:inline" /></label>
   <label id="balance">
