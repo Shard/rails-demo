@@ -24,8 +24,6 @@ provider "docker" {}
 
 # AWS configuration
 provider "aws" {
-  #shared_credentials_files = ["$HOME/.aws/credentials"]
-  #profile                 = "default"
   region                  = "${var.aws_region}"
 }
 data "aws_caller_identity" "current" {}
@@ -234,6 +232,50 @@ resource "aws_ecs_task_definition" "rails_task" {
   }])
 }
 
+resource "aws_ecs_task_definition" "rails_background" {
+  family                   = "rails-background-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecsTaskExecutionRole.arn
+
+  container_definitions = jsonencode([{
+    name  = "rails-app"
+    image = resource.docker_image.rails_app.repo_digest
+    command = ["bundle", "exec", "rake", "jobs:run_price_generator"]
+    portMappings = [{
+      containerPort = 3000
+      hostPort      = 3000
+    }]
+    environment = [{
+      name  = "RAILS_ENV"
+      value = "production"
+    },{
+      name  = "DATABASE_URL"
+      value = "postgresql://foo:${random_password.postgres_password.result}@rails-demo-cluster.cluster-c92ciaceww0z.ap-southeast-2.rds.amazonaws.com:5432/rails_app_production"
+    },{
+      name  = "REDIS_URL"
+      value = "redis://${aws_elasticache_cluster.redis.cache_nodes.0.address}:6379"
+    },{
+      name  = "SECRET_KEY_BASE"
+      value = "not-used :)"
+    }, {
+      name  = "SENTRY_DSN"
+      value = "https://7f62063764598ee3af9e32bbdbb96f9f@o52427.ingest.us.sentry.io/4507954611421184"
+    }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = "${aws_cloudwatch_log_group.rails_log_group.id}"
+        awslogs-region        = "${var.aws_region}"
+        awslogs-create-group  = "true"
+        awslogs-stream-prefix = "ecs"
+      }
+    }
+  }])
+}
+
 # Create ECS service
 resource "aws_ecs_service" "rails_service" {
   name            = "rails-app-service"
@@ -256,6 +298,21 @@ resource "aws_ecs_service" "rails_service" {
   deployment_circuit_breaker {
     enable   = true
     rollback = true
+  }
+}
+
+resource "aws_ecs_service" "rails_background_service" {
+  name            = "rails-background-service"
+  cluster         = aws_ecs_cluster.rails_cluster.id
+  task_definition = aws_ecs_task_definition.rails_background.arn
+  launch_type     = "FARGATE"
+  desired_count   = 1
+
+  network_configuration {
+    # @HACK: use a public IP instead of private which would require NAT gateway in order to access the container task
+    subnets          = module.vpc.public_subnets
+    assign_public_ip = true
+    security_groups  = [aws_security_group.rails_app_sg.id]
   }
 }
 
@@ -341,23 +398,7 @@ resource "aws_alb_listener" "https" {
     target_group_arn = aws_alb_target_group.rails.arn
   }
 }
-/*
-resource "aws_alb_listener_rule" "rails_default" {
-  listener_arn = aws_alb_listener.https.arn
-  priority     = 100
 
-  action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.rails.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/"]
-    }
-  }
-}
-*/
 resource "aws_alb_target_group" "rails" {
   lifecycle {
     create_before_destroy = true
