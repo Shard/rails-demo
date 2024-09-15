@@ -39,7 +39,7 @@ docker run --rm -v $(pwd):/usr/src/app -w /usr/src/app ruby bundle lock --update
 # AWS Deployment
 Deployments are handled by Github Actions and Terraform. The target is AWS Cloud.
 
-When a new commit is pushed to `master` and all required CI steps pass, a container artifact will be published to the github container registery and a terraform plan will be generated. 
+When a new commit is pushed to `master` and all required CI steps pass, a container artifact will be published to the github container registry and a terraform plan will be generated. 
 
 During this time the plan step can be inspected to see all the changes that will be made and the container will be available under [packages](https://github.com/Shard/rails-demo/pkgs/container/rails-demo). Once the [deployment](https://github.com/Shard/rails-demo/deployments) has been approved the plan will be applied to AWS.
 
@@ -70,7 +70,7 @@ Using AWS Aurora [ZDP](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGu
 
 For a small database this will in most cases work fine, but as the database starts to grow bigger and more demand is put on it, the risks and length of an outage would naturally increase. Scaling out to more than 1 instance would be the first approach, to allow for rolling updates which for espicially read heavy loads can be a very effective measure.
 
-Going further can also be adopting green/blue deployemnt stratergies to allow testing a production envrionement's deployment before sending it live. Green/Blue could also adopt more advanced systems of rollback triggering relating to metrics (eg: elevated 5XX errors, performance spikes, etc.) while also expanding out the time to fully change over.
+Going further can also be adopting Green/Blue deployemnt stratergies to allow testing a production envrionement's deployment before sending it live. Green/Blue could also adopt more advanced systems of rollback triggering relating to metrics (eg: elevated 5XX errors, performance spikes, etc.) while also expanding out the time to fully change over.
 
 Depending on the workload requirements and business requirements, other approaches could also be taken in terms of reducing data consistency requirements, either through postgres directly or by adopting other services (eg: elastic, mongo, clickhouse) in front of postgres that can not only offload and speedup workloads, but provide a buffer for postgres if it loses availability for any reason.
 
