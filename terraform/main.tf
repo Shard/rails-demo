@@ -247,10 +247,139 @@ resource "aws_ecs_service" "rails_service" {
     assign_public_ip = true
     security_groups  = [aws_security_group.rails_app_sg.id]
   }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.rails.arn
+    container_name   = "rails-app"
+    container_port   = 3000
+  }
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
+  }
 }
 
 # Data source for availability zones
 data "aws_availability_zones" "available" {}
+
+#################
+# Ingress (ALB)
+#################
+resource "aws_security_group" "alb" {
+  name   = "rails-app-alb-sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    protocol         = "tcp"
+    from_port        = 80
+    to_port          = 80
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  ingress {
+    protocol         = "tcp"
+    from_port        = 443
+    to_port          = 443
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  egress {
+    protocol         = "-1"
+    from_port        = 0
+    to_port          = 0
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+resource "aws_acm_certificate" "rails_app" {
+  domain_name       = var.public_domain
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+resource "aws_acm_certificate_validation" "rails_app" {
+  certificate_arn         = aws_acm_certificate.rails_app.arn
+  validation_record_fqdns = [for c in aws_acm_certificate.rails_app.domain_validation_options : c.resource_record_name]
+}
+
+resource "aws_lb" "main" {
+  name               = "rails-app-alb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = module.vpc.public_subnets
+  security_groups    = [aws_security_group.alb.id]
+
+  enable_deletion_protection = false
+}
+resource "aws_alb_listener" "http" {
+  load_balancer_arn = aws_lb.main.id
+  port              = 80
+  protocol          = "HTTP"
+  default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+resource "aws_alb_listener" "https" {
+  load_balancer_arn = aws_lb.main.id
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate_validation.rails_app.certificate_arn
+
+  default_action {
+    type = "forward"
+    target_group_arn = aws_alb_target_group.rails.arn
+  }
+}
+/*
+resource "aws_alb_listener_rule" "rails_default" {
+  listener_arn = aws_alb_listener.https.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.rails.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/"]
+    }
+  }
+}
+*/
+resource "aws_alb_target_group" "rails" {
+  lifecycle {
+    create_before_destroy = true
+  }
+  name_prefix          = "stg-"
+  port                 = 3000
+  protocol             = "HTTP"
+  vpc_id               = module.vpc.vpc_id
+  target_type          = "ip"
+  deregistration_delay = 0
+
+  health_check {
+    healthy_threshold   = "3"
+    interval            = "30"
+    protocol            = "HTTP"
+    matcher             = "200"
+    timeout             = "3"
+    path                = "/up"
+    unhealthy_threshold = "10"
+  }
+}
+
 
 #################
 # Outputs
