@@ -29,3 +29,7 @@
 #bad-network.active{
   display: block;
 }
+
+input[type="text"][readonly]{
+  cursor: default;
+}

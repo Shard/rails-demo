@@ -13,19 +13,26 @@
   <canvas id="price-chart"></canvas>
 </div>
 
-<div id="trading-actions">
-  <!-------------------------------------------------------------->
-  <!-- <%= button_to 'Buy', buy_quotes_path, method: :post %>   -->
-  <!-- <%= button_to 'Sell', sell_quotes_path, method: :post %> -->
-  <!-------------------------------------------------------------->
-</div>
+<form>
+  <div class="trading-actions grid">
+    <span onclick="buyStock()" role="button">Buy</span>
+    <span onclick="sellStock()" role="button">Sell</span>
+    <span onclick="updateBalance(x => x + 1)" role="button" class="secondary">Praise the sun</span>
+  </div>
+  <label id="owned">Stocks Owned: <input type="text" readonly value="0" style="display:inline" /></label>
+  <label id="balance">
+    Balance: <input type="text" readonly value="0" style="display:inline" />
+  </label>
+</form>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const price_data = <%= raw @historical_prices.to_json %>.reverse();
   const ctx = document.getElementById('price-chart').getContext('2d');
   let chart = null;
-
+  let balance = parseDecimal(localStorage.getItem('rails.balance')) || 10;
+  let owned = parseDecimal(localStorage.getItem('rails.owned')) || 0;
+  
   function updateChart(newData) {
     if(typeof newData !== 'undefined') {
       price_data.push(newData);
@@ -67,7 +74,49 @@
       }
     });
   }
+
+  // Updates balance/owned using a functor
+  function updateBalance(updateFun) {
+    balance = parseDecimal(updateFun(balance));
+    localStorage.setItem('rails.balance', balance);
+    document.getElementById('balance').querySelector('input').value = moneyFormat.format(balance);
+  }
+  function updateOwned(updateFun) {
+    owned = parseDecimal(updateFun(owned));
+    localStorage.setItem('rails.owned', owned);
+    document.getElementById('owned').querySelector('input').value = owned;
+  }
+
+  // buy and sell functions
+  function buyStock() {
+    const price = parseDecimal(price_data[0][0]);
+    if(balance < price) {
+      alert('Not enough funds');
+      return;
+    }
+    updateBalance(x => x -= price);
+    updateOwned(x => x+1);
+  }
+
+  function sellStock() {
+    if(owned < 1) {
+      alert('Not enough stocks');
+      return;
+    }
+    updateBalance(x => x += parseDecimal(price_data[0][0]));
+    updateOwned(x => x-1);
+  }
+
+  function parseDecimal(value) {
+    return parseFloat(parseFloat(value).toFixed(2));
+  }
+
+  const moneyFormat = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+  
+  // Bindings
   document.addEventListener('DOMContentLoaded', renderChart);
-  // @HACK: Probably a better event to listen to here
   document.addEventListener('turbo:load', renderChart);
 </script>
