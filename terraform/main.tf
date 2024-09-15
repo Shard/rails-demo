@@ -182,6 +182,7 @@ data "docker_registry_image" "rails_app" {
 }
 resource "docker_image" "rails_app" {
   name = data.docker_registry_image.rails_app.name
+  pull_triggers = [data.docker_registry_image.rails_app.sha256_digest]
 }
 
 resource "aws_ecs_task_definition" "rails_task" {
@@ -242,6 +243,21 @@ resource "aws_ecs_service" "rails_service" {
 # Data source for availability zones
 data "aws_availability_zones" "available" {}
 
+#################
+# Outputs
+#################
+
 output "vpc_id" {
   value = module.vpc.vpc_id
+}
+output "app-container-location" {
+  value = resource.docker_image.rails_app.repo_digest
+}
+
+output "app-container-hash" {
+  value = data.docker_registry_image.rails_app.sha256_digest
+}
+
+output "rds-endpoint" {
+  value = aws_rds_cluster.postgresql.endpoint
 }
