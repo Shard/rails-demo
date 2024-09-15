@@ -157,6 +157,10 @@ jobs:
     needs: [ publish ]
     if: always() && !cancelled() && !contains(needs.*.result, 'failure')
 
+    environment:
+     name: production
+     url: https://rails-demo.82dk.net
+
     env:
       TF_CLOUD_ORGANIZATION: "shard-org"
       TF_WORKSPACE: "rails-app"
