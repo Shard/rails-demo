@@ -89,6 +89,14 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Set DB as test
+        run: bin/rails db:environment:set RAILS_ENV=test
+
+      - name: DB Migrations
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:migrate
+
       - name: Run tests
         env:
           RAILS_ENV: test

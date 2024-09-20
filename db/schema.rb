@@ -10,14 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_13_120154) do
+ActiveRecord::Schema[7.2].define(version: 2024_09_20_044258) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   create_table "quotes", force: :cascade do |t|
     t.decimal "price"
     t.datetime "created"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.index ["created"], name: "index_quotes_on_created"
   end
 end

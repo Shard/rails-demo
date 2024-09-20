@@ -3,7 +3,7 @@ class GenerateQuotesJob < ApplicationJob
 
   def perform
     # Generate price
-    previous_quote = Quote.order(created_at: :desc).first
+    previous_quote = Quote.order(created: :desc).first
     previous_price = previous_quote&.price || 50.0  # Default starting price
 
     # Generate new price with some randomness but based on previous price
